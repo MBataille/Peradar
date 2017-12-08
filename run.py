@@ -1,5 +1,5 @@
 from mechanize import Browser
-from time import sleep
+import time
 from BeautifulSoup import BeautifulSoup
 from pygame import mixer
 
@@ -10,6 +10,7 @@ PREGUNTAS = 3
 R1 = [50,40]
 R2 = [56, 46]
 RAMOS = ["Calculo", "Algebra"]
+MENSAJES_CADA = 5*60 # La cantidad de segundos entre mensaje y mensaje
 
 # MUSICA: lista de una lista por ramo, cada lista contiene la musica que 
 # se va a reproducir dependiendo de si cagaste, vas a ex de 2da, pasaste, respectivamente
@@ -70,7 +71,7 @@ for link in browser.links():
 assert len(links_notas) != 0, '\nNO SE ENCONTRARON LINKS DEL CONTROL: {}\n'.format(CONTROL)
 print "Buscando notas..."
 
-
+t0 = None
 noHayNotas = True
 hayNota = [False for i in range(len(links_notas))]
 while False in hayNota:
@@ -98,4 +99,10 @@ while False in hayNota:
 			r = raw_input('presiona cualquier tecla para parar ')
 			mixer.music.stop()
 		browser.back()
-	sleep(10)
+	if t0 == None:
+		print "Aun no hay notas"
+		t0 = time.time()
+	else:
+		if time.time()-t0 >= MENSAJES_CADA:
+			print "Aun no hay notas"
+	time.sleep(10)
