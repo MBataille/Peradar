@@ -93,4 +93,4 @@ while False in hayNota:
 			r = raw_input('presiona cualquier tecla para parar ')
 			mixer.music.stop()
 		browser.back()
-	sleep(1)
+	sleep(10)
