@@ -4,7 +4,7 @@ from BeautifulSoup import BeautifulSoup
 from pygame import mixer
 
 USERNAME = 'martin.bataille'
-PASSWORD = 'magnum321M'
+PASSWORD = 'mipass'
 CONTROL = 'EX' # EX = examen, C1 = control 1, etc...
 PREGUNTAS = 3
 R1 = [50,40]
