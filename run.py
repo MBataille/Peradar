@@ -3,9 +3,9 @@ from time import sleep
 from BeautifulSoup import BeautifulSoup
 from pygame import mixer
 
-USERNAME = 'notengo.nombre'
-PASSWORD = 'notengopass'
-CONTROL = 'C1' # EX = examen, C1 = control 1, etc...
+USERNAME = 'martin.bataille'
+PASSWORD = 'magnum321M'
+CONTROL = 'EX' # EX = examen, C1 = control 1, etc...
 PREGUNTAS = 3
 R1 = [50,40]
 R2 = [56, 46]
@@ -34,8 +34,8 @@ def parse(html):
 			n_pregunta = p.find('P') + 1
 			n_pregunta = int(p[n_pregunta]) - 1
 			nota = n.find('>') + 1
-			if n[nota] != '-': # Hay nota
-				notas[n_pregunta] = int(n[nota:nota+2])
+			if n[nota] == '-': return None 
+			notas[n_pregunta] = int(n[nota:nota+2])
 		return notas
 
 def mean(notas):
@@ -47,6 +47,7 @@ browser = Browser()
 browser.set_handle_robots(False)
 
 # Entra a la pagina
+print "Ingresando a reclamos..."
 browser.open('https://www.u-cursos.cl/upasaporte/login?servicio=dim_reclamos&')
 
 # Obtiene el formulario
@@ -57,6 +58,8 @@ browser['username'] = USERNAME
 browser['password'] = PASSWORD
 browser.submit()
 
+assert browser.geturl()[7:14] == "reclamo", "\nLOGIN INCORRECTO\n"
+print "Login exitoso"
 links_notas = []
 
 # Busco los links que lleven a las notas que quiero, EX, C1, etc
@@ -65,6 +68,8 @@ for link in browser.links():
 		links_notas.append(link)
 # Si no se encuentran, aborta
 assert len(links_notas) != 0, '\nNO SE ENCONTRARON LINKS DEL CONTROL: {}\n'.format(CONTROL)
+print "Buscando notas..."
+
 
 noHayNotas = True
 hayNota = [False for i in range(len(links_notas))]
