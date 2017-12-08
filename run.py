@@ -3,8 +3,8 @@ import time
 from BeautifulSoup import BeautifulSoup
 from pygame import mixer
 
-USERNAME = 'miusuario'
-PASSWORD = 'mipass'
+USERNAME = 'martin.bataille'
+PASSWORD = 'magnum321M'
 CONTROL = 'EX' # EX = examen, C1 = control 1, etc...
 PREGUNTAS = 3
 R1 = [50,40]
@@ -105,4 +105,5 @@ while False in hayNota:
 	else:
 		if time.time()-t0 >= MENSAJES_CADA:
 			print "Aun no hay notas"
+			t0 = time.time()
 	time.sleep(10)
