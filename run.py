@@ -99,7 +99,6 @@ while False in hayNota:
 			r = raw_input('presiona cualquier tecla para parar ')
 			mixer.music.stop()
 		browser.back()
-<<<<<<< HEAD
 	if t0 == None:
 		print "Aun no hay notas"
 		t0 = time.time()
@@ -107,6 +106,3 @@ while False in hayNota:
 		if time.time()-t0 >= MENSAJES_CADA:
 			print "Aun no hay notas"
 	time.sleep(10)
-=======
-	sleep(10)
->>>>>>> e59266cf9e5d82bb52f7a0dda0fa06357550fc8b
