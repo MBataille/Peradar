@@ -8,7 +8,7 @@ Para correr PO9 necesitas python 2.7 y los módulos BeautifulSoup, Mechanize y P
 1. Instalar BeautifulSoup. Abre la consola (CMD) y escribe:
     ```
     python -m pip install BeautifulSoup
-    ```
+    ```
 1. Instalar Mechanize. Repite el paso anterior con:
     ```
     python -m pip install mechanize
