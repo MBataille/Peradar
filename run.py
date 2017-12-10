@@ -36,11 +36,17 @@ def parse(html):
 			n_pregunta = int(p[n_pregunta]) - 1
 			nota = n.find('>') + 1
 			if n[nota] == '-': return None 
-			notas[n_pregunta] = int(n[nota:nota+2])
+			if n[nota+1] == '<': notas[n_pregunta] = int(n[nota])
+			else: notas[n_pregunta] = int(n[nota:nota+2])
 		return notas
 
 def mean(notas):
 	return round(1.0*sum(notas)/len(notas))
+
+def log(s):
+	t = time.localtime()
+	print "{}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec) + " " + s
+
 
 mixer.init()
 browser = Browser()
@@ -48,7 +54,7 @@ browser = Browser()
 browser.set_handle_robots(False)
 
 # Entra a la pagina
-print "Ingresando a reclamos..."
+log("Ingresando a reclamos...")
 browser.open('https://www.u-cursos.cl/upasaporte/login?servicio=dim_reclamos&')
 
 # Obtiene el formulario
@@ -60,7 +66,7 @@ browser['password'] = PASSWORD
 browser.submit()
 
 assert browser.geturl()[7:14] == "reclamo", "\nLOGIN INCORRECTO\n"
-print "Login exitoso"
+log("Login exitoso")
 links_notas = []
 
 # Busco los links que lleven a las notas que quiero, EX, C1, etc
@@ -69,7 +75,7 @@ for link in browser.links():
 		links_notas.append(link)
 # Si no se encuentran, aborta
 assert len(links_notas) != 0, '\nNO SE ENCONTRARON LINKS DEL CONTROL: {}\n'.format(CONTROL)
-print "Buscando notas..."
+log("Buscando notas...")
 
 t0 = None
 noHayNotas = True
@@ -86,24 +92,31 @@ while False in hayNota:
 			nota = mean(notas)
 			j = -1
 			if nota < R1[k]:
-				print "Sere wn"
+				log("No pasaste :(")
 				j = 0
 			elif nota < R2[k]:
-				print "Aun se puede"
+				log("Se puede con examen de segunda")
 				j = 1
 			else:
-				print "BIEN CTMMMM"
+				log("Pasaste!!!!")
 				j = 2
-			mixer.music.load(MUSICA[k][j])
+			try:
+				mixer.music.load(MUSICA[k][j])
+			except:
+				print "############################"
+				print "No encuentro el archivo de musica que me diste. \
+				Escribiste bien el nombre? Verificaste que estamos en el mismo directorio?"
+				print "############################"
+				assert False, ""
 			mixer.music.play(-1, START[k][j])
 			r = raw_input('presiona cualquier tecla para parar ')
 			mixer.music.stop()
 		browser.back()
 	if t0 == None:
-		print "Aun no hay notas"
+		log( "Aun no hay notas")
 		t0 = time.time()
 	else:
 		if time.time()-t0 >= MENSAJES_CADA:
-			print "Aun no hay notas"
+			log("Aun no hay notas")
 			t0 = time.time()
 	time.sleep(10)
