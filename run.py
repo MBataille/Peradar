@@ -1,7 +1,10 @@
 from mechanize import Browser
 import time
 from BeautifulSoup import BeautifulSoup
-from pygame import mixer
+from pygame import error as PygameError, mixer
+
+class MusicError(Exception):
+	pass
 
 USERNAME = 'miusuario'
 PASSWORD = 'mipass'
@@ -102,12 +105,9 @@ while False in hayNota:
 				j = 2
 			try:
 				mixer.music.load(MUSICA[k][j])
-			except:
-				print "############################"
-				print "No encuentro el archivo de musica que me diste. \
-				Escribiste bien el nombre? Verificaste que estamos en el mismo directorio?"
-				print "############################"
-				assert False, ""
+			except PygameError:
+				raise MusicError("No se encontro el archivo de musica ingresado, {}. \
+					Verifica que lo escribiste bien y que esta en este mismo directorio")
 			mixer.music.play(-1, START[k][j])
 			r = raw_input('presiona cualquier tecla para parar ')
 			mixer.music.stop()
