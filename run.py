@@ -1,26 +1,38 @@
 from mechanize import Browser
+import config
 import time
 from BeautifulSoup import BeautifulSoup
-from pygame import mixer
+from pygame import error as PygameError, mixer
 
-USERNAME = 'miusuario'
-PASSWORD = 'mipass'
-CONTROL = 'EX' # EX = examen, C1 = control 1, etc...
-PREGUNTAS = 3
-R1 = [50,40]
-R2 = [56, 46]
-RAMOS = ["Calculo", "Algebra"]
-MENSAJES_CADA = 5*60 # La cantidad de segundos entre mensaje y mensaje
+class MusicFileError(Exception):
+	pass
+
+if config.isConfigFile():
+	r = config.checkValido('Continuar con configuracion actual?')
+	if r == 'n':
+		config.setConfig()
+else:
+	config.setConfig()
+params = config.readConfig()
+
+
+USERNAME = params['USERNAME']
+PASSWORD = params['PASSWORD']
+CONTROL = params['CONTROL'] # EX = examen, C1 = control 1, etc...
+PREGUNTAS = params['PREGUNTAS']
+R1 = params['R2']
+R2 = params['R1']
+RAMOS = params['RAMOS']
+MENSAJES_CADA = params['MENSAJES_CADA'] # La cantidad de segundos entre mensaje y mensaje
 
 # MUSICA: lista de una lista por ramo, cada lista contiene la musica que 
 # se va a reproducir dependiendo de si cagaste, vas a ex de 2da, pasaste, respectivamente
 # en el ramo correspondiente. Sientete libre de cambiar los nombres de las canciones.
-MUSICA = [['calculo_cagaste.mp3','calculo_segunda.mp3','calculo_pasaste.mp3'],
-['algebra_cagaste.mp3','algebra_segunda.mp3','algebra_pasaste.mp3']]
+MUSICA = params['MUSICA']
 
 # START: segundo en el que quieres que parta cada cancion, sigue la misma estructura que MUSICA
 # esto sirve pa saltarte la parte fome y llegar al tiro al coro o lo que quieras
-START = [[45.5, 46.5, 46.5], [45.5, 46.5, 46.5]]
+START = params['START']
 
 def parse(html):
 	parsed_html = BeautifulSoup(html) # lo categoriza en body, div, etc para acceder mas rapido
@@ -43,9 +55,14 @@ def parse(html):
 def mean(notas):
 	return round(1.0*sum(notas)/len(notas))
 
+def t_str(t):
+	if t < 10:
+		return '0' + str(t)
+	return str(t)
+
 def log(s):
 	t = time.localtime()
-	print "{}:{}:{}".format(t.tm_hour, t.tm_min, t.tm_sec) + " " + s
+	print "{}:{}:{}".format(t_str(t.tm_hour), t_str(t.tm_min), t_str(t.tm_sec)) + " " + s
 
 
 mixer.init()
@@ -102,12 +119,8 @@ while False in hayNota:
 				j = 2
 			try:
 				mixer.music.load(MUSICA[k][j])
-			except:
-				print "############################"
-				print "No encuentro el archivo de musica que me diste. \
-				Escribiste bien el nombre? Verificaste que estamos en el mismo directorio?"
-				print "############################"
-				assert False, ""
+			except PygameError:
+				raise MusicFileError("No se encontro el archivo de musica ingresado, {}. Verifica que lo escribiste bien y que esta en este mismo directorio".format(MUSICA[k][j]))
 			mixer.music.play(-1, START[k][j])
 			r = raw_input('presiona cualquier tecla para parar ')
 			mixer.music.stop()
