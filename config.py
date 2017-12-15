@@ -10,7 +10,7 @@ doc  = {
 	'CONTROL' : 'Codigo del control o examen (\'C1\', \'EX\', etc)',
 	'PREGUNTAS' : 'Cantidad de preguntas que tiene el control o examen.',
 	'RAMOS' : 'Ramos, ingresa 0 para terminar',
-	'R2' : 'OPCIONAL: INota por ramo que necesitas en el examen para ir a examen de segunda.\
+	'R2' : 'OPCIONAL: Nota por ramo que necesitas en el examen para ir a examen de segunda.\
 	Si no aplica, dejalo en cero.',
 	'R1' : 'Nota por ramo que necesitas para pasar el ramo (sin tener que dar el examen de segunda).',
 	'MUSICA' : 'Ingresa las canciones que se reproduciran',
@@ -125,12 +125,6 @@ def toConfig(sth):
 	else:
 		c = str(sth)
 	return c
-assert toConfig('abc') == 'abc'
-assert toConfig(123) == '123'
-assert toConfig([1,2,3]) == '1,2,3', toConfig([1,2,3])
-assert toConfig(['1', '2', '3']) == '1,2,3'
-assert toConfig([[1,2,3],[4,5,6]]) == '1,2,3:4,5,6'
-assert toConfig([['1','2','3'],['4','5','6']]) == '1,2,3:4,5,6'
 
 def setConfig():
 	print 'Bienvenido al sistema de configuracion!'
