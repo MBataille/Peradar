@@ -1,0 +1,99 @@
+#: kivy 1.0.9
+
+<InfoScreen>:
+    BoxLayout:
+        orientation: 'vertical'
+        listaRamos: listaRamos_layout
+        Label:
+            text: "Hemos encontrado los ramos siguientes"
+            font_size: 32
+            size_hint: 1, 0.3
+        ListaRamosLayout:
+            id: listaRamos_layout
+            size_hint: 1, 0.7
+            orientation: 'vertical'
+
+            RamoLayout:
+                id: ramo_layout
+                orientation: 'horizontal'
+                controles: controles_layout
+                
+                Label:
+                    font_size: 26
+                    size_hint: 0.4, 1
+                    text: self.parent.name
+                ControlesLayout:
+                    id: controles_layout
+                    size_hint: 0.6, 1
+
+
+<LoginScreen>:
+    BoxLayout
+        id: login_layout
+        orientation: 'vertical'
+        padding: [10,50,10,50]
+        spacing: 50
+
+        Label:
+            text: 'Peradar'
+            font_size: 40
+
+        Label:
+            id: login_info
+            text: root.login_info_text
+            font_size: 20
+
+        BoxLayout:
+            orientation: 'vertical'
+
+            Label:
+                text: 'Login'
+                font_size: 18
+                halign: 'left'
+                text_size: root.width-20, 20
+
+            TextInput:
+                id: login
+                multiline:False
+                font_size: 20
+
+        BoxLayout:
+            orientation: 'vertical'
+            Label:
+                text: 'Password'
+                halign: 'left'
+                font_size: 18
+                text_size: root.width-20, 20
+
+            TextInput:
+                id: password
+                multiline:False
+                password:True
+                font_size: 28
+
+        Button:
+            text: 'Ingresar'
+            font_size: 24
+            on_press: root.changeScreen(login.text, password.text)
+<LoadBall>:
+    size: 25,25
+    angle: 90
+    canvas:
+        Ellipse:
+            pos: self.pos
+            size: self.size 
+<LoadScreen>:
+    ball: load_ball
+    FloatLayout:
+        id: layout
+        LoadBall:
+            id: load_ball
+            center: root.center
+            radius: root.height / 8
+            size_hint: None, None       
+        Label:
+            font_size: 50 
+            size_hint: None, None
+            center_x: layout.width / 2
+            center_y: layout.height / 4
+            text: "Cargando..."
