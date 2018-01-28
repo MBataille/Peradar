@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from mechanize import Browser
 from kivy.logger import Logger as log
 import re
@@ -26,27 +28,32 @@ class ReclamoScraper:
 	def logIn(self, username, password, queue = None):
 		log.info('Lib: Checkeo de login')
 
-		# queue = None if not 'queue' in kwargs else kwargs['queue']
 		self.browser.open('https://www.u-cursos.cl/upasaporte/login?servicio=dim_reclamos&')
 
 		self.browser.select_form(nr=0)
 
 		self.browser['username'] = username
 		self.browser['password'] = password
-		self.browser.submit()
+		resp = self.browser.submit()
 
 		if self.browser.geturl()[7:14] == "reclamo": # LogIn exitoso
 			log.info('Lib: Login exitoso')
 			if queue is None:
 				return True
-			queue.put(True)
+			#log.debug('Lib: browser? %s response? %s', self.browser, resp.read())
+			queue.put((True, self.browser, resp.read()))
+			log.debug('Lib: Agregada la tupla')
 			return
 		log.warning('Lib: Login incorrecto')
 		if queue is None: return False
-		queue.put(False)
+		queue.put((False,))
 
-	def setSoup(self):
-		self.soup = BeautifulSoup(self.browser.response().read())
+	def setBrowser(self,browser,html):
+		self.browser = browser
+		#log.debug('Lib: response: %s', self.browser.response())
+		self.soup = BeautifulSoup(html)
+	def setSoup(self, resp):
+		self.soup = BeautifulSoup(resp.read())
 
 	def getRamos(self):
 		ramos = []
@@ -65,18 +72,19 @@ class ReclamoScraper:
 		if len(cont) == 0: log.warning('Lib: No hay controles para el ramo ' + str(ramo.string))
 		return cont	
 	#Still have to test this 
-	def getInfo(self, ramo_name):
+	def getInfo(self):
 		info = []
 		i = 0
-		l = soup.findAll(href = re.compile('view'))
-		log.debug('Lib: Getting info: list is %s', l)
+		# if self.soup is None: self.setSoup()
+		L = self.soup.findAll(href = re.compile('view'))
 		for r in self.getRamos():
 			i += 1
 			ramo = Ramo(r.string)
-			while len(l[i].string) == 2: # asumiendo que los controles son de largo 2
-				log.debug('Lib: controles, %s', l[i].string)
-				ramo.addControl(l[i].string) 
+			while i<len(L) and len(L[i].string) == 2: # asumiendo que los controles son de largo 2
+				log.debug('Lib: controles, %s', L[i].string)
+				ramo.addControl(L[i].string) 
 				i += 1
+			log.debug('Lib: Ramo creado es: %s', ramo)
 			info.append(ramo)
 		return info
 

@@ -1,31 +1,43 @@
 #: kivy 1.0.9
-
+<RamoLayout>:
+    orientation: 'horizontal'
+    spacing: 20
+    Label:
+        font_size: 26
+        size_hint: 0.4, 1
+        text: self.parent.ramo_name
+    ControlesLayout:
+        id: controles_layout
+        orientation: 'horizontal'
+        size_hint: 0.6, 1
 <InfoScreen>:
     BoxLayout:
         orientation: 'vertical'
-        listaRamos: listaRamos_layout
+        spacing: 20
         Label:
-            text: "Hemos encontrado los ramos siguientes"
-            font_size: 32
+            text: "Selecciona el o los controles que quieras poner en el peradar"
+            font_size: 24
             size_hint: 1, 0.3
+
         ListaRamosLayout:
             id: listaRamos_layout
-            size_hint: 1, 0.7
-            orientation: 'vertical'
+            size_hint: 1, 0.6
+            orientation: 'vertical'               
 
-            RamoLayout:
-                id: ramo_layout
-                orientation: 'horizontal'
-                controles: controles_layout
-                
-                Label:
-                    font_size: 26
-                    size_hint: 0.4, 1
-                    text: self.parent.name
-                ControlesLayout:
-                    id: controles_layout
-                    size_hint: 0.6, 1
-
+        BoxLayout:
+            size_hint: 1, 0.1
+            orientation: 'horizontal'
+            Button:
+                on_press: root.manager.current= 'login'
+                text: 'Atras'
+                font_size: 28
+                color: (.75,.75,.75,1) # light grey
+                size_hint: 0.3,1
+            Button:
+                text: 'Siguiente'
+                font_size: 28
+                color: (.75, .75, .75, 1)
+                size_hint: 0.7,1
 
 <LoginScreen>:
     BoxLayout
@@ -60,7 +72,7 @@
         BoxLayout:
             orientation: 'vertical'
             Label:
-                text: 'Password'
+                text: 'Contraseña'
                 halign: 'left'
                 font_size: 18
                 text_size: root.width-20, 20
