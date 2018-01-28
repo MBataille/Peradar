@@ -53,8 +53,9 @@ class InfoScreen(Screen):
         self.ids.listaRamos_layout.createRamos(ramos)
 
 class ListaRamosLayout(BoxLayout):
-
+    """Layout donde van varios RamoLayout"""
     def createRamos(self, ramos):
+        """Dada una lista de ramos (de la clase Ramo) crea los RamoLayout y ControlesLayout"""
         for ramo in ramos:
             log.debug('Peradar: Creando %s', ramo.name)
             ramo_layout = RamoLayout()
@@ -63,15 +64,19 @@ class ListaRamosLayout(BoxLayout):
             log.debug('Peradar: Adding widget (almost done)')
             self.add_widget(ramo_layout)
 class RamoLayout(BoxLayout):
+    """Layout donde va un Label y un ControlesLayout"""
     ramo_name = StringProperty('')
 
     def setName(self, name):
-        n = unidecode(name).split(' ') # quito el codigo del ramo
-        self.ramo_name = ' '.join(n[i] for i in range(1, len(n)))
+        """Settea el nombre del ramo que luego se muestra en pantalla"""
+        n = unidecode(name).split(' ') # quito el codigo del ramo y le saco tildes para evitar
+        self.ramo_name = ' '.join(n[i] for i in range(1, len(n))) # errores
     def createControles(self, controles):
+        """Crea los controles de este ramo dado una lista de controles"""
         self.ids.controles_layout.createControles(controles)
 
 class ControlesLayout(BoxLayout):
+    """Layout donde va un Label y un boton por control"""
     active_btn = ObjectProperty(None)
     normal_color = ListProperty([1, 1, 1, .3])
     pressed_color = ListProperty([1, 1, 1, .7])
@@ -83,6 +88,7 @@ class ControlesLayout(BoxLayout):
         self.active_btn = instance
 
     def createControles(self, controles):
+        """Crea un boton por control"""
         for control in controles:
             control_btn = Button(text = control, background_normal = '', background_down = '',
                 background_color = self.normal_color)
@@ -90,9 +96,11 @@ class ControlesLayout(BoxLayout):
             self.add_widget(control_btn)
 
 class LoadBall(Widget):
+    """Pelota de la animacion de cargando"""
     angle = NumericProperty(0)
     radius = NumericProperty(0)
-    def move(self):  
+    def move(self):
+        """Descripcion del movimiento de la pelota"""  
         if self.angle >= 450: self.angle = 90
         self.angle += 10*exp(-(self.angle/100-2.7)**2) + 1
         self.pos = Vector(self.radius*cos(radians(self.angle)), 
@@ -110,23 +118,26 @@ class LoadScreen(Screen):
     def on_enter(self):
         log.info('Peradar: Procesando login')
         app = App.get_running_app()
-        self.output = mp.Queue()
+
+        self.output = mp.Queue() # sirve de intermediario entre procesos
+
+        # creo el proceso
         getLogin = mp.Process(target = app.scrape.logIn,
             args = (self.username,self.password), kwargs = {'queue' : self.output})
         getLogin.daemon = True
-        getLogin.start()
+        getLogin.start() # lo lanzo
         log.info('Peradar: Proceso login creado!')
         self.wait_login_schedule = Clock.schedule_interval(self.wait_login, 1.0/30)
 
-    def on_pre_enter(self):
+    def on_pre_enter(self): # para la animacion de la pelota
         self.update_schedule = Clock.schedule_interval(self.update, 1.0/60)
       
 
-    def on_leave(self):
+    def on_leave(self): # al cambiar de ventana, cancela la animacion y la espera de info
         self.wait_login_schedule.cancel()
         self.update_schedule.cancel()
 
-    def wait_login(self, dt):
+    def wait_login(self, dt): # espera respuesta del proceso
         if not self.output.empty():
             out = self.output.get()
             if not out[0]:
@@ -165,7 +176,7 @@ class LoginScreen(Screen):
 
         load = self.manager.get_screen('load')
 
-        load.save_login(loginText, passwordText)
+        load.save_login(loginText, passwordText) # guarda la informacion
 
 
     def showWarning(self):
