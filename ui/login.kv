@@ -1,4 +1,24 @@
 #: kivy 1.0.9
+
+<LoadFloatLayout>:
+    id: load_float_layout
+    label_text: "Buscando nota"
+    Label:
+        font_size: 40 
+        size_hint: None, None
+        center_x: load_float_layout.width / 2
+        center_y: load_float_layout.height / 4
+        text: load_float_layout.label_text
+    LoadBall:
+        radius: load_float_layout.height / 8
+        size_hint: None, None
+        center: load_float_layout.center
+<SearchScreen>:
+    box_layout: load_box_layout
+    BoxLayout:
+        orientation: 'horizontal'
+        id: load_box_layout
+
 <RamoLayout>:
     orientation: 'horizontal'
     spacing: 20
@@ -15,7 +35,7 @@
         orientation: 'vertical'
         spacing: 20
         Label:
-            text: "Selecciona el o los controles que quieras poner en el peradar"
+            text: root.infoText
             font_size: 24
             size_hint: 1, 0.3
 
@@ -28,13 +48,15 @@
             size_hint: 1, 0.1
             orientation: 'horizontal'
             Button:
-                on_press: root.manager.current= 'login'
+                on_press: root.go_back()
+               # on_press: root.manager.current= 'login' 
                 text: 'Atras'
                 font_size: 28
                 color: (.75,.75,.75,1) # light grey
                 size_hint: 0.3,1
             Button:
                 text: 'Siguiente'
+                on_press: root.go_forward()
                 font_size: 28
                 color: (.75, .75, .75, 1)
                 size_hint: 0.7,1
@@ -90,6 +112,7 @@
 <LoadBall>:
     size: 25,25
     angle: 90
+    radius: root.height/8
     canvas:
         Ellipse:
             pos: self.pos
