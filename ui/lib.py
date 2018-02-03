@@ -1,17 +1,35 @@
 # -*- coding: utf-8 -*-
 
+from BeautifulSoup import BeautifulSoup
 from mechanize import Browser
 from kivy.logger import Logger as log
 import re
-from BeautifulSoup import BeautifulSoup
+import time
+
+_base_url = 'http://reclamo.dim.uchile.cl'
+
+def _is_int(a):
+	try:
+		int(a)
+		return True
+	except ValueError:
+		return False
+
 
 class Control:
-	""" Guarda los datos de un control, Attrs: name (str), partial_url (str) """
-	def __init__(self, name, partial_url):
+	"""
+	Guarda los datos de un control,
+	Attrs: name (str), partial_url (str), ramo (str)
+	"""
+
+	def __init__(self, name, partial_url, ramo=None):
 		self.name = name
 		self.partial_url = partial_url
+		self.ramo = ramo if ramo is None else ramo.split(' ')[0]
 
-	def _str__(self): return self.name
+	def __str__(self):
+		return ('' if self.ramo is None else self.ramo) + ": " + self.name
+
 
 class Ramo:
 	"""
@@ -39,11 +57,13 @@ class Ramo:
 			if c.name == name:
 				return c.partial_url
 		return None
+
+
 class ReclamoScraper:
 	"""
 	Interfaz para obtener la informacion de reclamos dim
 
-	TODO: Agregar funcion para recibir notas que funcione con
+	ToDo: Agregar funcion para recibir notas que funcione con
 	multiprocessing
 	"""
 	def __init__(self):
@@ -52,7 +72,8 @@ class ReclamoScraper:
 		self.soup = None
 		self.username = None
 		self.password = None
-	def logIn(self, username, password, queue = None, selfUserPass = False):
+
+	def logIn(self, username, password, queue=None, selfUserPass=False):
 		"""
 		Args: username (str), password (str), queue (mp.queue), selfUserPass (bool)
 
@@ -64,7 +85,7 @@ class ReclamoScraper:
 		y el codigo html de reclamos (si es que el resultado es True)
 
 		Si selfUserPass se settea a True, entonces usa el user y pass de la clase.
-		Importante setear user y pass con setUserPass antes. 
+		Importante setear user y pass con setUserPass antes.
 		"""
 		log.info('Lib: Checkeo de login')
 
@@ -85,8 +106,7 @@ class ReclamoScraper:
 		self.browser['username'] = username
 		self.browser['password'] = password
 		resp = self.browser.submit()
-
-		if self.browser.geturl()[7:14] == "reclamo": # LogIn exitoso
+		if self.browser.geturl()[7:14] == "reclamo":  # LogIn exitoso
 			log.info('Lib: Login exitoso')
 			if queue is None:
 				return True
@@ -94,10 +114,11 @@ class ReclamoScraper:
 			log.debug('Lib: Agregada la tupla')
 			return
 		log.warning('Lib: Login incorrecto')
-		if queue is None: return False
-		queue.put((False,None))
+		if queue is None:
+			return False
+		queue.put((False, None))
 
-	def setBeautifulSoup(self,html):
+	def setBeautifulSoup(self, html):
 		""" Recupera la informacion del proceso que realizo el Login"""
 		self.soup = BeautifulSoup(html)
 
@@ -109,10 +130,11 @@ class ReclamoScraper:
 	def getRamos(self):
 		"""Retorna una lista con los ramos (cada ramo es un tag de beautifulsoup)"""
 		ramos = []
-		for el in self.soup.findAll(href = re.compile('cursos')):
-			ramos.append(el) 
-		if len(ramos) == 0: log.error('Lib: No hay ramos')
-		return ramos 
+		for el in self.soup.findAll(href=re.compile('cursos')):
+			ramos.append(el)
+		if len(ramos) == 0:
+			log.error('Lib: No hay ramos')
+		return ramos
 
 	def getInfo(self):
 		"""
@@ -122,13 +144,51 @@ class ReclamoScraper:
 		info = []
 		i = 0
 		# if self.soup is None: self.setSoup()
-		L = self.soup.findAll(href = re.compile('view'))
+		L = self.soup.findAll(href=re.compile('view'))
 		for r in self.getRamos():
 			i += 1
 			ramo = Ramo(r.string)
-			while i<len(L) and len(L[i].string) == 2: # asumiendo que los controles son de largo 2
-				ramo.addControl(L[i].string, L[i]['href']) 
+			while i < len(L) and len(L[i].string) == 2:  # asumiendo que los controles son de largo 2
+				ramo.addControl(L[i].string, L[i]['href'])
 				i += 1
 			log.debug('Lib: Ramo creado es: %s', ramo)
 			info.append(ramo)
 		return info
+
+	def getNotas(self, control):
+		"""
+		Retorna una lista con las notas.
+		Si no hay notas, retorna una lista vacia.
+		"""
+		log.debug('Lib: Opening, %s', (_base_url + control.partial_url))
+		self.soup = BeautifulSoup(self.browser.open(_base_url + control.partial_url).read())
+		self.browser.back()
+		if self.soup.find('table') is None:
+			log.debug('Lib: TABLE NOT FOUND\n %s', self.soup.prettify())
+		notas = []
+		for row in self.soup.find('table').findAll('tr'):
+			for el in row.findAll('td'):
+				nota = None
+				if _is_int(el.text):
+					nota = int(el.text)
+				if nota is not None:
+					notas.append(nota)
+		log.debug('Lib: Notas: %s', notas)
+		return notas
+
+	def searchNotas(self, p, queue, user, passw):
+		"""
+		Busca notas por ramo en reclamos hasta que encuentra al menos 3
+		"""
+		if not self.logIn(user, passw):
+			raise Exception('Usuario o Contraseña incorrectos')
+		notas_ramos = [[] for _ in p]
+		while [] in notas_ramos:
+			for i in range(len(p)):
+				if len(notas_ramos[i]) >= 3:
+					continue
+				notas_ramos[i] = self.getNotas(p[i])
+				if len(notas_ramos[i]) >= 3:
+					log.debug('Lib: Sent notas: %s, del ramo: %s', notas_ramos[i], p[i])
+					queue.put((p[i], notas_ramos[i]))
+			time.sleep(10)

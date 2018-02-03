@@ -2,12 +2,13 @@
 
 <LoadFloatLayout>:
     id: load_float_layout
-    label_text: "Buscando nota"
+    label_text: "Buscando "
+    index: ""
     Label:
         font_size: 40 
         size_hint: None, None
-        center_x: load_float_layout.width / 2
-        center_y: load_float_layout.height / 4
+        pos_hint: {'center_x': 0.5, 'center_y': 0.25}
+        halign: 'center'
         text: load_float_layout.label_text
     LoadBall:
         radius: load_float_layout.height / 8
@@ -125,6 +126,7 @@
             id: load_ball
             center: root.center
             radius: root.height / 8
+            angle: 90
             size_hint: None, None       
         Label:
             font_size: 50 
