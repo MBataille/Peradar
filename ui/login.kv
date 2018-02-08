@@ -89,6 +89,7 @@
 
             TextInput:
                 id: login
+                write_tab: False
                 multiline:False
                 font_size: 20
 
@@ -107,9 +108,10 @@
                 font_size: 28
 
         Button:
+            id: submit_button
             text: 'Ingresar'
             font_size: 24
-            on_press: root.changeScreen(login.text, password.text)
+            on_press: root.changeScreen()
 <LoadBall>:
     size: 25,25
     angle: 90
