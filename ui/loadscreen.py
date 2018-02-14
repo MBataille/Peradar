@@ -40,8 +40,8 @@ class LoadScreen(Screen):
 
     def wait_login(self, dt):  # espera respuesta del proceso
         if not self.output.empty():
-            out = self.output.get()
-            if not out[0]:
+            is_logged = self.output.get()
+            if not is_logged:
                 log.info('Peradar: Login incorrecto')
                 self.go_back()
                 return
@@ -49,7 +49,6 @@ class LoadScreen(Screen):
                 self.manager.transition = SlideTransition(direction='left',
                                                           duration=0.2)
                 self.manager.current = 'info'
-                App.get_running_app().scrape.setBeautifulSoup(out[1])
                 self.manager.get_screen('info').setInfo()
 
     def go_back(self):

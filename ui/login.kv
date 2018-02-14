@@ -1,9 +1,26 @@
 #: kivy 1.0.9
 
+<NotasWidget>:
+    id: notas_widget
+    FloatLayout:
+        Label:
+            text: notas_widget.control.__str__()
+            font_size: 26
+            pos_hint: {'center_x': 0.5, 'center_y': 0.8}
+            halign: 'center'
+        GridLayout:
+            cols: 4
+            id: notas_grid
+            pos_hint: {'center_x': 0.5, 'center_y': 0.5}
+        Label:
+            text: notas_widget.resultado
+            font_size: 30
+
+
 <LoadFloatLayout>:
     id: load_float_layout
     label_text: "Buscando "
-    index: ""
+    # index: ""
     Label:
         font_size: 40 
         size_hint: None, None

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from lib import ReclamoScraper
+from offlib import ReclamoScraper
+# from lib import ReclamoScraper
 import kivy
 from kivy.app import App
 from kivy.config import Config

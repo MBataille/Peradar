@@ -19,16 +19,20 @@ def _is_int(a):
 class Control:
 	"""
 	Guarda los datos de un control,
-	Attrs: name (str), partial_url (str), ramo (str)
+	Attrs: name (str), partial_url (str), ramo (str), id (int)
 	"""
 
 	def __init__(self, name, partial_url, ramo=None):
 		self.name = name
 		self.partial_url = partial_url
 		self.ramo = ramo if ramo is None else ramo.split(' ')[0]
+		self.id = None
+
+	def setId(self, an_id):
+		self.id = an_id
 
 	def __str__(self):
-		return ('' if self.ramo is None else self.ramo) + ": " + self.name
+		return ('' if self.ramo is None else (self.ramo + ": ")) + self.name
 
 
 class Ramo:
@@ -41,11 +45,11 @@ class Ramo:
 		self.controles = []
 
 	def __str__(self):
-		return self.name + ': ' + '/'.join(str(c) for c in self.controles)
+		return (self.name + ': ') + '/'.join(str(c) for c in self.controles)
 
 	def addControl(self, control, url):
 		"""Agrega un control a los controles del ramo"""
-		self.controles.append(Control(control, url))
+		self.controles.append(Control(control, url, ramo=self.name))
 
 	def getControles(self):
 		"""Retorna la lista de controles del ramo"""
@@ -72,6 +76,7 @@ class ReclamoScraper:
 		self.soup = None
 		self.username = None
 		self.password = None
+		self.resp = None
 
 	def logIn(self, username, password, queue=None, selfUserPass=False):
 		"""
@@ -105,22 +110,24 @@ class ReclamoScraper:
 
 		self.browser['username'] = username
 		self.browser['password'] = password
-		resp = self.browser.submit()
+		self.resp = self.browser.submit()
 		if self.browser.geturl()[7:14] == "reclamo":  # LogIn exitoso
 			log.info('Lib: Login exitoso')
 			if queue is None:
 				return True
-			queue.put((True, resp.read()))
-			log.debug('Lib: Agregada la tupla')
+			queue.put(True)
 			return
 		log.warning('Lib: Login incorrecto')
 		if queue is None:
 			return False
-		queue.put((False, None))
+		queue.put(False)
 
-	def setBeautifulSoup(self, html):
+	def setBeautifulSoup(self, html=None):
 		""" Recupera la informacion del proceso que realizo el Login"""
-		self.soup = BeautifulSoup(html)
+		if html is None:
+			self.soup = BeautifulSoup(self.resp)
+		else:
+			self.soup = BeautifulSoup(html)
 
 	def setUserPass(self, user, passw):
 		"""Settea usuario y pass para el login. Evitar el uso de esta funcion"""
@@ -141,9 +148,13 @@ class ReclamoScraper:
 		Retorna una lista de ramos (de la clase Ramo) que se encontraron en reclamos dim.
 		Cada ramo contiene el nombre del ramo y sus controles.
 		"""
+		if self.soup is None:
+			if self.resp is None:
+				log.error('Lib: No se encontro resp ni soup.')
+				raise Exception('Mechanize response not found')
+			self.setBeautifulSoup()
 		info = []
 		i = 0
-		# if self.soup is None: self.setSoup()
 		L = self.soup.findAll(href=re.compile('view'))
 		for r in self.getRamos():
 			i += 1

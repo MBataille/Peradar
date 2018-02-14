@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from lib import Control
+from kivy.app import App
 from kivy.logger import Logger as log
 from kivy.properties import StringProperty, ObjectProperty, ListProperty, BooleanProperty
 from kivy.uix.boxlayout import BoxLayout
@@ -98,8 +99,9 @@ class RamoLayout(BoxLayout):
     def setName(self, name):
         """Settea el nombre del ramo que luego se muestra en pantalla"""
         self.unparsed_ramo_name = name
-        n = unidecode(name).split(' ')  # quito el codigo del ramo y le saco tildes
-        self.ramo_name = ' '.join(n[i] for i in range(1, len(n)))  # para evitar errores
+        self.ramo_name = self.unparsed_ramo_name.split(' ')[0]
+        # n = unidecode(name).split(' ')  # quito el codigo del ramo y le saco tildes
+        # self.ramo_name = ' '.join(n[i] for i in range(1, len(n)))  # para evitar errores
 
     def createControles(self, controles):
         """Crea los controles de este ramo dado una lista de controles"""
