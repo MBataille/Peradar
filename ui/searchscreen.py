@@ -3,6 +3,7 @@ import multiprocessing as mp
 from kivy.app import App
 from kivy.clock import Clock
 from kivy.logger import Logger as log
+from kivy.uix.label import Label
 from kivy.properties import ObjectProperty, ListProperty, StringProperty, NumericProperty,\
     BooleanProperty
 from kivy.uix.floatlayout import FloatLayout
@@ -14,9 +15,15 @@ from loadball import LoadBall
 class NotasWidget(Widget):
     notas = ListProperty([])
     control = ObjectProperty(None)
-    # control_name = StringProperty("")
     resultado = StringProperty("")
 
+    def setNotas(self):
+        for nota in self.notas:
+            self.ids.notas_layout.add_widget(Label(text=str(nota)))
+        self.ids.notas_layout.add_widget(Label(
+                                        text=str(round(sum(self.notas)\
+                                                       * 1.0 / len(self.notas)
+                                                       ))))
 
 class LoadFloatLayout(FloatLayout):
     def findBall(self):
@@ -43,14 +50,20 @@ class SearchScreen(Screen):
 
     def _resultado(self, notas):
         mean = sum(notas) * 1.0 / len(notas)
-        return True if mean >= self.cota else False
+        return 'Yaaay' if mean >= self.cota else 'Buuu'
 
     def gotNotas(self, control, notas):
         layout = self.layouts[control.id]  # LoadFloatLayout donde va el buscando
+        log.debug('SearchScreen: Setting layout %s, and its children: %s', layout,
+                  layout.children)
         self.schedules[control.id].cancel()
         layout.clear_widgets()
-        layout.add_widget(NotasWidget(notas=notas, control=control, 
-                                      resultado=str(self._resultado(notas))))
+        log.debug('SearchScreen: Set layout %s, and its children: %s', layout, layout.children)
+        n = NotasWidget(notas=notas, control=control, 
+                        resultado=str(self._resultado(notas)),
+                        size_hint=(1 / len(self.box_layout.children), 1))
+        n.setNotas()
+        layout.add_widget(n)
 
     def waitNotas(self, dt):
         if not self.queue.empty():

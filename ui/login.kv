@@ -2,15 +2,16 @@
 
 <NotasWidget>:
     id: notas_widget
+    pos_hint: {'center_x': 0.5, 'center_y': 0.5}
     FloatLayout:
         Label:
             text: notas_widget.control.__str__()
             font_size: 26
             pos_hint: {'center_x': 0.5, 'center_y': 0.8}
             halign: 'center'
-        GridLayout:
-            cols: 4
-            id: notas_grid
+        BoxLayout:
+            orientation: 'vertical'
+            id: notas_layout
             pos_hint: {'center_x': 0.5, 'center_y': 0.5}
         Label:
             text: notas_widget.resultado
